@@ -93,12 +93,12 @@ def get_feature_dataframe(user):
     feature_table = []
     col_name = ["user_id", "user_gender", "user_age", "user_life_cycle", "user_is_multicultural", "user_is_one_parent", "user_income", "user_is_disabled", 'User_is_veterans']
 
-    cursor.execute('SELECT * FROM users WHERE user_id = "%s"' % user)
+    cursor.execute('SELECT * FROM user WHERE user_id = "%s"' % user)
 
     user_feature = cursor.fetchone()[0:9]
     feature_table.append(list(user_feature))
 
-    cursor.execute('SELECT * FROM users WHERE user_id != "%s"' % user)
+    cursor.execute('SELECT * FROM user WHERE user_id != "%s"' % user)
 
     another_user_feature = cursor.fetchall()
 
@@ -136,10 +136,10 @@ def get_collaborative_filtering_welfare(user, size):
 def get_interest_most_like_welfare(user, size):
     welfare_list = []
 
-    cursor.execute('SELECT * FROM user_interest WHERE user_id = "%s"' % user)
-    user_interest = cursor.fetchone()[2]
-
-    cursor.execute('SELECT * FROM welfare WHERE category = "%d" ORDER BY like_count DESC' % user_interest)
+    cursor.execute('SELECT b.welfare_id FROM user_interest a '
+                   'INNER JOIN welfare_category b ON a.category_id = b.category_id '
+                   'INNER JOIN welfare c ON b.welfare_id = c.welfare_id '
+                   'WHERE a.user_id = "%s"ORDER BY c.like_count DESC' % user)
     welfare = cursor.fetchmany(size=size)
 
     for i in welfare:
