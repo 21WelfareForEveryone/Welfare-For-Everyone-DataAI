@@ -91,7 +91,7 @@ def predict(sentence):
 # User_Based_Collaborative_Filtering
 def get_feature_dataframe(user):
     feature_table = []
-    col_name = ["user_id", "user_gender", "user_age", "user_life_cycle", "user_is_multicultural", "user_is_one_parent", "user_income", "user_is_disabled", 'User_is_veterans']
+    col_name = ["user_id", "user_gender", "user_age", "user_life_cycle", "user_is_multicultural", "user_is_one_parent", "user_income", "user_is_disabled", 'user_is_veteran']
 
     cursor.execute('SELECT * FROM user WHERE user_id = "%s"' % user)
 
