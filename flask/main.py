@@ -63,7 +63,7 @@ class TrainDataset(Dataset):
 def load_model():
     chatbot_model = AutoModel.from_pretrained("beomi/KcELECTRA-base", num_labels=363)
 
-    chatbot_model.load_state_dict(torch.load('./model.pt'))
+    chatbot_model.load_state_dict(torch.load('./model.pt', map_location=device))
 
     return chatbot_model
 
@@ -91,11 +91,11 @@ def predict(sentence):
 # User_Based_Collaborative_Filtering
 def get_feature_dataframe(user):
     feature_table = []
-    col_name = ["user_id", "user_gender", "user_age", "user_life_cycle", "user_is_multicultural", "user_is_one_parent", "user_income", "user_is_disabled", 'user_is_veteran']
+    col_name = ["user_id", "user_gender", "user_age", "user_life_cycle", "user_is_multicultural", "user_is_one_parent", "user_income", "user_is_disabled"]
 
     cursor.execute('SELECT * FROM user WHERE user_id = "%s"' % user)
 
-    user_feature = cursor.fetchone()[0:9]
+    user_feature = cursor.fetchone()[0:8]
     feature_table.append(list(user_feature))
 
     cursor.execute('SELECT * FROM user WHERE user_id != "%s"' % user)
@@ -103,7 +103,7 @@ def get_feature_dataframe(user):
     another_user_feature = cursor.fetchall()
 
     for i in another_user_feature:
-        feature_table.append(list(i[0:9]))
+        feature_table.append(list(i[0:8]))
     similarity_dataframe = pd.DataFrame(feature_table, columns=col_name)
     similarity_dataframe.set_index('user_id', inplace=True)
     return similarity_dataframe
@@ -182,11 +182,11 @@ def personal_recommend(user):
     return welfare_list
 
 
+# CPU 사용
+device = torch.device('cpu')
+
 # LOAD CHATBOT MODEL
 model = load_model()
-
-# GPU 사용
-device = torch.device("cpu")
 
 # Initialize
 app = Flask(__name__)
@@ -212,7 +212,7 @@ Flask Server의 Response
 # Define a route for url
 @app.route('/chatbot', methods=['GET', 'POST'])
 def action():
-    global model, device
+    global model
 
     reqJson = request.get_json()
     user_message = reqJson["message"]
