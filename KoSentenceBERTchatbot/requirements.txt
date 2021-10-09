@@ -5,3 +5,4 @@ nltk
 tqdm
 sentence_transformers
 torch >= 1.4.0
+Flask
