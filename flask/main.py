@@ -14,18 +14,6 @@ import os
 from flask import Flask, request, jsonify
 
 load_dotenv()  # env 파일 Load
-
-# MySQL 연결
-conn = pymysql.connect(
-    host=os.environ.get("host"),
-    port=int(os.environ.get("port")),  # mysql 포트
-    user=os.environ.get("user"),  # 접속 계정
-    password=os.environ.get("password"),  # 루트계정 본인 비번
-    db=os.environ.get("db"),  # 접속하려는 데이터베이스 명
-    charset='utf8'
-)
-
-cursor = conn.cursor()
 #################################################################
 
 
@@ -90,6 +78,18 @@ def predict(sentence):
 
 # User_Based_Collaborative_Filtering
 def get_feature_dataframe(user):
+    # MySQL 연결
+    conn = pymysql.connect(
+        host=os.environ.get("host"),
+        port=int(os.environ.get("port")),  # mysql 포트
+        user=os.environ.get("user"),  # 접속 계정
+        password=os.environ.get("password"),  # 루트계정 본인 비번
+        db=os.environ.get("db"),  # 접속하려는 데이터베이스 명
+        charset='utf8'
+    )
+
+    cursor = conn.cursor()
+
     feature_table = []
     col_name = ["user_id", "user_gender", "user_age", "user_life_cycle", "user_is_multicultural", "user_is_one_parent", "user_income", "user_is_disabled"]
 
@@ -106,10 +106,25 @@ def get_feature_dataframe(user):
         feature_table.append(list(i[0:8]))
     similarity_dataframe = pd.DataFrame(feature_table, columns=col_name)
     similarity_dataframe.set_index('user_id', inplace=True)
+
+    conn.close()
+
     return similarity_dataframe
 
 
 def get_collaborative_filtering_welfare(user, size):
+    # MySQL 연결
+    conn = pymysql.connect(
+        host=os.environ.get("host"),
+        port=int(os.environ.get("port")),  # mysql 포트
+        user=os.environ.get("user"),  # 접속 계정
+        password=os.environ.get("password"),  # 루트계정 본인 비번
+        db=os.environ.get("db"),  # 접속하려는 데이터베이스 명
+        charset='utf8'
+    )
+
+    cursor = conn.cursor()
+
     df = ubcf.get_cosine_similarity_user(get_feature_dataframe(user))
     col = df.columns.tolist()[1:]
     li = df.values.tolist()[0][1:]
@@ -128,12 +143,28 @@ def get_collaborative_filtering_welfare(user, size):
                 break
         if len(welfare_list) == size:
             break
+
+    conn.close()
+
     return welfare_list
 #######################################################################################
 
 
 # 관심 카테고리 복지 중 좋아요 개수 상위
 def get_interest_most_like_welfare(user, size):
+
+    # MySQL 연결
+    conn = pymysql.connect(
+        host=os.environ.get("host"),
+        port=int(os.environ.get("port")),  # mysql 포트
+        user=os.environ.get("user"),  # 접속 계정
+        password=os.environ.get("password"),  # 루트계정 본인 비번
+        db=os.environ.get("db"),  # 접속하려는 데이터베이스 명
+        charset='utf8'
+    )
+
+    cursor = conn.cursor()
+
     welfare_list = []
 
     cursor.execute('SELECT b.welfare_id FROM user_interest a '
@@ -145,11 +176,26 @@ def get_interest_most_like_welfare(user, size):
     for i in welfare:
         welfare_list.append(i[0])
 
+    conn.close()
+
     return welfare_list
 
 
 # 전체 복지 중 좋아요 개수 상위
 def get_most_like_welfare(size):
+
+    # MySQL 연결
+    conn = pymysql.connect(
+        host=os.environ.get("host"),
+        port=int(os.environ.get("port")),  # mysql 포트
+        user=os.environ.get("user"),  # 접속 계정
+        password=os.environ.get("password"),  # 루트계정 본인 비번
+        db=os.environ.get("db"),  # 접속하려는 데이터베이스 명
+        charset='utf8'
+    )
+
+    cursor = conn.cursor()
+
     welfare_list = []
 
     cursor.execute('SELECT * FROM welfare ORDER BY like_count DESC')
@@ -157,6 +203,8 @@ def get_most_like_welfare(size):
 
     for i in welfare:
         welfare_list.append(i[0])
+
+    conn.close()
 
     return welfare_list
 
