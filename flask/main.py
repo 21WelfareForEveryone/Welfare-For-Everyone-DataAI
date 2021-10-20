@@ -91,11 +91,11 @@ def get_feature_dataframe(user):
     cursor = conn.cursor()
 
     feature_table = []
-    col_name = ["user_id", "user_gender", "user_age", "user_life_cycle", "user_is_multicultural", "user_is_one_parent", "user_income", "user_is_disabled"]
+    col_name = ["user_id", "user_gender", "user_life_cycle", "user_is_multicultural", "user_is_one_parent", "user_income", "user_is_disabled"]
 
     cursor.execute('SELECT * FROM user WHERE user_id = "%s"' % user)
 
-    user_feature = cursor.fetchone()[0:8]
+    user_feature = cursor.fetchone()[0:7]
     feature_table.append(list(user_feature))
 
     cursor.execute('SELECT * FROM user WHERE user_id != "%s"' % user)
@@ -103,7 +103,7 @@ def get_feature_dataframe(user):
     another_user_feature = cursor.fetchall()
 
     for i in another_user_feature:
-        feature_table.append(list(i[0:8]))
+        feature_table.append(list(i[0:7]))
     similarity_dataframe = pd.DataFrame(feature_table, columns=col_name)
     similarity_dataframe.set_index('user_id', inplace=True)
 
@@ -235,6 +235,8 @@ device = torch.device('cpu')
 
 # LOAD CHATBOT MODEL
 model = load_model()
+model = model.to(device)
+model.eval()
 
 # Initialize
 app = Flask(__name__)
@@ -265,10 +267,6 @@ def action():
     reqJson = request.get_json()
     user_message = reqJson["message"]
     user_id = reqJson["id"]
-
-    model = model.to(device)
-
-    model.eval()
 
     chatbot_label = predict(user_message)
 
